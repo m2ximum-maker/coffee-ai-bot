@@ -47,6 +47,18 @@ async def cmd_start(message: Message) -> None:
     )
 
 
+@dp.message(Command("cancel"))
+async def cmd_cancel(message: Message, state: FSMContext) -> None:
+    current_state = await state.get_state()
+
+    if current_state is None:
+        await message.answer("Сейчас нечего отменять")
+        return
+
+    await state.clear()
+    await message.answer("Добавление отменено")
+
+
 @dp.message(AddExpense.waiting_for_amount)
 async def process_add_amount(message: Message, state: FSMContext) -> None:
     try:
