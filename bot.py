@@ -52,6 +52,24 @@ def parse_add_command(text: str) -> tuple[int, str, str | None]:
     return amount, drink, coffee_shop
 
 
+def get_add_error_message(error: ValueError) -> str:
+    error_code = str(error)
+
+    if error_code == "missing amount":
+        return "Сумма отсутствует. Пример: /add 250 капучино"
+
+    if error_code == "invalid amount":
+        return "Не понял сумму. Пример: /add 250 капучино"
+
+    if error_code == "amount must be positive":
+        return "Сумма должна быть больше нуля"
+
+    return (
+        "☕ Формат: /add <сумма> [напиток] [кофейня]\n"
+        "Пример: /add 250 капучино"
+    )
+
+
 @dp.message(Command("add"))
 async def cmd_add(message: Message) -> None:
     if not message.from_user:
@@ -60,11 +78,8 @@ async def cmd_add(message: Message) -> None:
 
     try:
         amount, drink, coffee_shop = parse_add_command(message.text or "")
-    except ValueError:
-        await message.answer(
-            "☕ Формат: /add <сумма> [напиток] [кофейня]\n"
-            "Пример: /add 250 капучино"
-        )
+    except ValueError as error:
+        await message.answer(get_add_error_message(error))
         return
 
     uid = message.from_user.id
