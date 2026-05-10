@@ -8,7 +8,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message
 from dotenv import load_dotenv
 
-from db import init_db, add_expense, delete_expense, get_expenses, get_total_expenses
+from db import init_db
 from formatting import format_expense_item
 from parsing import (
     get_add_error_message,
@@ -16,6 +16,12 @@ from parsing import (
     parse_add_command,
     parse_amount,
     parse_delete_command,
+)
+from services import (
+    create_expense,
+    delete_user_expense,
+    get_user_expenses,
+    get_user_total_expenses,
 )
 
 load_dotenv()
@@ -98,7 +104,7 @@ async def process_add_coffee_shop(message: Message, state: FSMContext) -> None:
     amount = data["amount"]
     drink = data["drink"]
 
-    add_expense(
+    create_expense(
         user_id=message.from_user.id,
         amount=amount,
         drink=drink,
@@ -130,7 +136,7 @@ async def cmd_add(message: Message, state: FSMContext) -> None:
 
     uid = message.from_user.id
 
-    add_expense(
+    create_expense(
         user_id=uid,
         amount=amount,
         drink=drink,
@@ -156,7 +162,7 @@ async def cmd_delete(message: Message) -> None:
         await message.answer(get_delete_error_message(error))
         return
 
-    deleted = delete_expense(
+    deleted = delete_user_expense(
         user_id=message.from_user.id,
         expense_id=expense_id,
     )
@@ -176,7 +182,7 @@ async def cmd_result(message: Message) -> None:
 
     uid = message.from_user.id
 
-    total = get_total_expenses(uid)
+    total = get_user_total_expenses(uid)
 
     if total == 0:
         await message.answer("Пока нет трат ☕")
@@ -192,7 +198,7 @@ async def cmd_list(message: Message) -> None:
         return
 
     uid = message.from_user.id
-    expenses = get_expenses(uid)
+    expenses = get_user_expenses(uid)
 
     if not expenses:
         await message.answer("Пока нет трат ☕")
