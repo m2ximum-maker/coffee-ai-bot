@@ -2,10 +2,15 @@ import unittest
 
 from parsing import (
     ERROR_AMOUNT_NOT_POSITIVE,
+    ERROR_EXPENSE_ID_NOT_POSITIVE,
+    ERROR_INVALID_EXPENSE_ID,
     ERROR_INVALID_AMOUNT,
+    ERROR_MISSING_EXPENSE_ID,
     ERROR_MISSING_AMOUNT,
     get_add_error_message,
+    get_delete_error_message,
     parse_add_command,
+    parse_delete_command,
 )
 
 
@@ -52,6 +57,43 @@ class GetAddErrorMessageTest(unittest.TestCase):
         self.assertEqual(
             get_add_error_message(ValueError(ERROR_AMOUNT_NOT_POSITIVE)),
             "Сумма должна быть больше нуля",
+        )
+
+
+class ParseDeleteCommandTest(unittest.TestCase):
+    def test_parse_delete_command(self) -> None:
+        self.assertEqual(parse_delete_command("/delete 3"), 3)
+
+    def test_parse_missing_expense_id(self) -> None:
+        with self.assertRaisesRegex(ValueError, ERROR_MISSING_EXPENSE_ID):
+            parse_delete_command("/delete")
+
+    def test_parse_invalid_expense_id(self) -> None:
+        with self.assertRaisesRegex(ValueError, ERROR_INVALID_EXPENSE_ID):
+            parse_delete_command("/delete abc")
+
+    def test_parse_negative_expense_id(self) -> None:
+        with self.assertRaisesRegex(ValueError, ERROR_EXPENSE_ID_NOT_POSITIVE):
+            parse_delete_command("/delete -3")
+
+
+class GetDeleteErrorMessageTest(unittest.TestCase):
+    def test_missing_expense_id_message(self) -> None:
+        self.assertEqual(
+            get_delete_error_message(ValueError(ERROR_MISSING_EXPENSE_ID)),
+            "Укажи id записи: /delete 3",
+        )
+
+    def test_invalid_expense_id_message(self) -> None:
+        self.assertEqual(
+            get_delete_error_message(ValueError(ERROR_INVALID_EXPENSE_ID)),
+            "Не понял id записи. Пример: /delete 3",
+        )
+
+    def test_positive_expense_id_message(self) -> None:
+        self.assertEqual(
+            get_delete_error_message(ValueError(ERROR_EXPENSE_ID_NOT_POSITIVE)),
+            "Id записи должен быть больше нуля",
         )
 
 

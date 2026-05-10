@@ -8,7 +8,7 @@ def format_created_at(created_at: str) -> str:
 
 
 def format_expense_item(
-    index: int,
+    expense_id: int,
     amount: int,
     drink: str,
     coffee_shop: Optional[str],
@@ -17,4 +17,4 @@ def format_expense_item(
     coffee_shop_text = coffee_shop or "-"
     created_at_text = format_created_at(created_at)
 
-    return f"{index} | {amount} ₽ | {drink} | {coffee_shop_text} | {created_at_text}"
+    return f"{expense_id} | {amount} ₽ | {drink} | {coffee_shop_text} | {created_at_text}"

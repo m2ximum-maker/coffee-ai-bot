@@ -50,6 +50,21 @@ def add_expense(user_id: int, amount: int, drink: str, coffee_shop: Optional[str
         )
         conn.commit()
 
+
+def delete_expense(user_id: int, expense_id: int) -> bool:
+    with sqlite3.connect(db_path()) as conn:
+        cursor = conn.execute(
+            """
+            DELETE FROM expenses
+            WHERE id = ? AND user_id = ?
+            """,
+            (expense_id, user_id),
+        )
+        conn.commit()
+
+        return cursor.rowcount > 0
+
+
 def get_expenses(user_id: int) -> list[tuple[int, int, int, str, Optional[str], str]]:
     with sqlite3.connect(db_path()) as conn:
         return conn.execute(

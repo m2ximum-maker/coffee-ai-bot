@@ -6,9 +6,14 @@ from aiogram.filters import Command
 from aiogram.types import Message
 from dotenv import load_dotenv
 
-from db import init_db, add_expense, get_expenses, get_total_expenses
+from db import init_db, add_expense, delete_expense, get_expenses, get_total_expenses
 from formatting import format_expense_item
-from parsing import parse_add_command, get_add_error_message
+from parsing import (
+    get_add_error_message,
+    get_delete_error_message,
+    parse_add_command,
+    parse_delete_command,
+)
 
 load_dotenv()
 
@@ -27,6 +32,7 @@ async def cmd_start(message: Message) -> None:
     await message.answer(
         f"Привет, {who}! Я бот для учета трат на кофе ☕\n"
         "Добавить трату: /add 250 капучино\n"
+        "Удалить трату: /delete 3\n"
         "Итог: /result\n"
         "Список трат: /list",
     )
@@ -58,6 +64,30 @@ async def cmd_add(message: Message) -> None:
     await message.answer(
         f"☕ Записал: {amount} ₽ — {drink}{shop_text}"
     )
+
+
+@dp.message(Command("delete"))
+async def cmd_delete(message: Message) -> None:
+    if not message.from_user:
+        await message.answer("Не удалось определить пользователя.")
+        return
+
+    try:
+        expense_id = parse_delete_command(message.text or "")
+    except ValueError as error:
+        await message.answer(get_delete_error_message(error))
+        return
+
+    deleted = delete_expense(
+        user_id=message.from_user.id,
+        expense_id=expense_id,
+    )
+
+    if not deleted:
+        await message.answer(f"Не нашел трату #{expense_id}")
+        return
+
+    await message.answer(f"Удалил трату #{expense_id}")
 
 
 @dp.message(Command("result"))
@@ -92,8 +122,8 @@ async def cmd_list(message: Message) -> None:
 
     lines = []
 
-    for index, (_id, user_id, amount, drink, coffee_shop, created_at) in enumerate(expenses, start=1):
-        lines.append(format_expense_item(index, amount, drink, coffee_shop, created_at))
+    for expense_id, user_id, amount, drink, coffee_shop, created_at in expenses:
+        lines.append(format_expense_item(expense_id, amount, drink, coffee_shop, created_at))
 
     result = "\n".join(lines)
 
