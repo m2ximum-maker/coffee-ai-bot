@@ -28,7 +28,7 @@ class CreateExpenseTest(unittest.TestCase):
         os.unlink(self.db_file.name)
 
     def test_create_expense(self) -> None:
-        create_expense(
+        expense = create_expense(
             user_id=1,
             amount=100,
             drink="американо",
@@ -37,6 +37,11 @@ class CreateExpenseTest(unittest.TestCase):
 
         expenses = get_expenses(user_id=1)
 
+        self.assertEqual(expense.id, expenses[0].id)
+        self.assertEqual(expense.amount, 100)
+        self.assertEqual(expense.drink, "американо")
+        self.assertEqual(expense.coffee_shop, "Жирафери")
+        self.assertTrue(expense.created_at)
         self.assertEqual(len(expenses), 1)
         self.assertEqual(expenses[0].amount, 100)
         self.assertEqual(expenses[0].drink, "американо")

@@ -9,8 +9,8 @@ def create_expense(
     amount: int,
     drink: str,
     coffee_shop: Optional[str],
-) -> None:
-    add_expense(
+) -> Expense:
+    return add_expense(
         user_id=user_id,
         amount=amount,
         drink=drink,

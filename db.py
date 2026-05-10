@@ -35,9 +35,11 @@ def init_db() -> None:
         )
         conn.commit()
 
-def add_expense(user_id: int, amount: int, drink: str, coffee_shop: Optional[str] = None) -> None:
+def add_expense(user_id: int, amount: int, drink: str, coffee_shop: Optional[str] = None) -> Expense:
+    created_at = datetime.now().isoformat(timespec="seconds")
+
     with sqlite3.connect(db_path()) as conn:
-        conn.execute(
+        cursor = conn.execute(
             """
             INSERT INTO expenses (user_id, amount, drink, coffee_shop, created_at)
             VALUES (?, ?, ?, ?, ?)
@@ -47,10 +49,24 @@ def add_expense(user_id: int, amount: int, drink: str, coffee_shop: Optional[str
                 amount,
                 drink,
                 coffee_shop,
-                datetime.now().isoformat(timespec="seconds"),
+                created_at,
             ),
         )
         conn.commit()
+
+        expense_id = cursor.lastrowid
+
+    if expense_id is None:
+        raise RuntimeError("Не удалось получить id созданной траты")
+
+    return Expense(
+        id=expense_id,
+        user_id=user_id,
+        amount=amount,
+        drink=drink,
+        coffee_shop=coffee_shop,
+        created_at=created_at,
+    )
 
 
 def delete_expense(user_id: int, expense_id: int) -> bool:

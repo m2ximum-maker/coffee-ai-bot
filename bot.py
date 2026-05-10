@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 
 from db import init_db
 from formatting import format_expense_item
+from models import Expense
 from parsing import (
     get_add_error_message,
     get_delete_error_message,
@@ -38,6 +39,11 @@ class AddExpense(StatesGroup):
     waiting_for_amount = State()
     waiting_for_drink = State()
     waiting_for_coffee_shop = State()
+
+
+def format_created_expense_message(expense: Expense) -> str:
+    shop_text = f" ({expense.coffee_shop})" if expense.coffee_shop else ""
+    return f"☕ Записал: {expense.amount} ₽ — {expense.drink}{shop_text}"
 
 
 @dp.message(Command("start"))
@@ -104,7 +110,7 @@ async def process_add_coffee_shop(message: Message, state: FSMContext) -> None:
     amount = data["amount"]
     drink = data["drink"]
 
-    create_expense(
+    expense = create_expense(
         user_id=message.from_user.id,
         amount=amount,
         drink=drink,
@@ -113,8 +119,7 @@ async def process_add_coffee_shop(message: Message, state: FSMContext) -> None:
 
     await state.clear()
 
-    shop_text = f" ({coffee_shop})" if coffee_shop else ""
-    await message.answer(f"☕ Записал: {amount} ₽ — {drink}{shop_text}")
+    await message.answer(format_created_expense_message(expense))
 
 
 @dp.message(Command("add"))
@@ -136,18 +141,14 @@ async def cmd_add(message: Message, state: FSMContext) -> None:
 
     uid = message.from_user.id
 
-    create_expense(
+    expense = create_expense(
         user_id=uid,
         amount=amount,
         drink=drink,
         coffee_shop=coffee_shop,
     )
 
-    shop_text = f" ({coffee_shop})" if coffee_shop else ""
-
-    await message.answer(
-        f"☕ Записал: {amount} ₽ — {drink}{shop_text}"
-    )
+    await message.answer(format_created_expense_message(expense))
 
 
 @dp.message(Command("delete"))

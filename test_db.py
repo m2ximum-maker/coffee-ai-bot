@@ -21,6 +21,16 @@ class DeleteExpenseTest(unittest.TestCase):
 
         os.unlink(self.db_file.name)
 
+    def test_add_expense_returns_created_expense(self) -> None:
+        expense = add_expense(user_id=1, amount=100, drink="американо")
+
+        self.assertEqual(expense.id, 1)
+        self.assertEqual(expense.user_id, 1)
+        self.assertEqual(expense.amount, 100)
+        self.assertEqual(expense.drink, "американо")
+        self.assertIsNone(expense.coffee_shop)
+        self.assertTrue(expense.created_at)
+
     def test_delete_own_expense(self) -> None:
         add_expense(user_id=1, amount=100, drink="американо")
         expense_id = get_expenses(user_id=1)[0].id
