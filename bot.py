@@ -1,13 +1,12 @@
 import asyncio
-import os
 
 from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message
-from dotenv import load_dotenv
 
+from config import get_bot_token
 from db import init_db
 from formatting import format_expense_item
 from models import Expense
@@ -24,13 +23,6 @@ from services import (
     get_user_expenses,
     get_user_total_expenses,
 )
-
-load_dotenv()
-
-bot_token = os.getenv("BOT_TOKEN")
-
-if not bot_token:
-    raise ValueError("BOT_TOKEN не найден в .env")
 
 dp = Dispatcher()
 
@@ -216,9 +208,7 @@ async def cmd_list(message: Message) -> None:
 
 
 async def main() -> None:
-    if not bot_token:
-        raise ValueError("BOT_TOKEN не найден в .env")
-
+    bot_token = get_bot_token()
     bot = Bot(token=bot_token)
     print("Бот успешно запущен ☕ Записываем траты на кофе...")
     init_db()

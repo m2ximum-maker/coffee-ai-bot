@@ -1,18 +1,13 @@
-import os
 import sqlite3
 
 from typing import Optional
 from datetime import datetime
 
+from config import get_db_path
 from models import Expense
 
 def db_path() -> str:
-    path = os.getenv("DB_PATH")
-
-    if path is None:
-        raise ValueError("DB_PATH не найден в .env")
-
-    return path
+    return get_db_path()
 
 
 def get_connection():
