@@ -17,6 +17,7 @@ if not bot_token:
 
 dp = Dispatcher()
 
+
 @dp.message(Command("start"))
 async def cmd_start(message: Message) -> None:
     username = message.from_user.username if message.from_user else None
@@ -29,30 +30,41 @@ async def cmd_start(message: Message) -> None:
     )
 
 
+def parse_add_command(text: str) -> tuple[int, str, str | None]:
+    parts = text.strip().split(maxsplit=3)
+
+    if len(parts) < 2:
+        raise ValueError("missing amount")
+
+    amount_raw = parts[1]
+
+    try:
+        amount = int(amount_raw)
+    except ValueError as error:
+        raise ValueError("invalid amount") from error
+
+    if amount <= 0:
+        raise ValueError("amount must be positive")
+
+    drink = parts[2].strip() if len(parts) > 2 else "кофе"
+    coffee_shop = parts[3].strip() if len(parts) > 3 else None
+
+    return amount, drink, coffee_shop
+
+
 @dp.message(Command("add"))
 async def cmd_add(message: Message) -> None:
     if not message.from_user:
         await message.answer("Не удалось определить пользователя.")
         return
 
-    parts = (message.text or "").strip().split(maxsplit=3)
-    
-    if len(parts) < 2:
-        await message.answer("☕ Формат: /add <сумма> [описание]\nПример: /add 250 капучино")
-        return
-    
-    drink = parts[2].strip() if len(parts) > 2 else "кофе"
-    coffee_shop = parts[3].strip() if len(parts) > 3 else None
-    amount_raw = parts[1]
-
     try:
-        amount = int(amount_raw)
+        amount, drink, coffee_shop = parse_add_command(message.text or "")
     except ValueError:
-        await message.answer(f"Не понял сумму: {parts[1]!r} ☕\nПример: /add 250 капучино")
-        return
-
-    if amount <= 0:
-        await message.answer("Сумма должна быть больше нуля ☕")
+        await message.answer(
+            "☕ Формат: /add <сумма> [напиток] [кофейня]\n"
+            "Пример: /add 250 капучино"
+        )
         return
 
     uid = message.from_user.id
@@ -70,6 +82,7 @@ async def cmd_add(message: Message) -> None:
         f"☕ Записал: {amount} ₽ — {drink}{shop_text}"
     )
 
+
 @dp.message(Command("result"))
 async def cmd_result(message: Message) -> None:
     if not message.from_user:
@@ -85,6 +98,7 @@ async def cmd_result(message: Message) -> None:
         return
 
     await message.answer(f"Итого по кофе: {total} ₽ ☕")
+
 
 @dp.message(Command("list"))
 async def cmd_list(message: Message) -> None:
@@ -108,6 +122,7 @@ async def cmd_list(message: Message) -> None:
     result = "\n".join(lines)
 
     await message.answer(f"Список трат ☕\n{result}")
+
 
 async def main() -> None:
     if not bot_token:
