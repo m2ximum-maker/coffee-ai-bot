@@ -28,7 +28,7 @@ def init_db() -> None:
         )
         conn.commit()
 
-def add_expense(user_id: int, amount: str, drink: str, coffee_shop: Optional[str] = None) -> None:
+def add_expense(user_id: int, amount: int, drink: str, coffee_shop: Optional[str] = None) -> None:
     with sqlite3.connect(db_path()) as conn:
         conn.execute(
             """
@@ -45,7 +45,7 @@ def add_expense(user_id: int, amount: str, drink: str, coffee_shop: Optional[str
         )
         conn.commit()
 
-def get_expenses(user_id: int) -> list[tuple[int, int, str, Optional[str], str]]:
+def get_expenses(user_id: int) -> list[tuple[int, int, int, str, Optional[str], str]]:
     with sqlite3.connect(db_path()) as conn:
         return conn.execute(
             """

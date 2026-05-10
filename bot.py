@@ -5,7 +5,6 @@ from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
 from aiogram.types import Message
 from dotenv import load_dotenv
-from decimal import Decimal, InvalidOperation
 
 from db import init_db, add_expense, get_expenses, get_total_expenses
 
@@ -17,10 +16,6 @@ if not bot_token:
     raise ValueError("BOT_TOKEN не найден в .env")
 
 dp = Dispatcher()
-
-# для cmd_add: uid -> список (сумма, описание)
-user_expenses: dict[int, list[tuple[Decimal, str]]] = {}
-
 
 @dp.message(Command("start"))
 async def cmd_start(message: Message) -> None:
@@ -115,6 +110,9 @@ async def cmd_list(message: Message) -> None:
     await message.answer(f"Список трат ☕\n{result}")
 
 async def main() -> None:
+    if not bot_token:
+        raise ValueError("BOT_TOKEN не найден в .env")
+
     bot = Bot(token=bot_token)
     print("Бот успешно запущен ☕ Записываем траты на кофе...")
     init_db()
