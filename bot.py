@@ -7,6 +7,7 @@ from aiogram.types import Message
 from dotenv import load_dotenv
 
 from db import init_db, add_expense, get_expenses, get_total_expenses
+from formatting import format_expense_item
 from parsing import parse_add_command, get_add_error_message
 
 load_dotenv()
@@ -92,8 +93,7 @@ async def cmd_list(message: Message) -> None:
     lines = []
 
     for index, (_id, user_id, amount, drink, coffee_shop, created_at) in enumerate(expenses, start=1):
-        shop_text = f" — {coffee_shop}" if coffee_shop else ""
-        lines.append(f"{index}. {amount} ₽ — {drink}{shop_text}")
+        lines.append(format_expense_item(index, amount, drink, coffee_shop, created_at))
 
     result = "\n".join(lines)
 
