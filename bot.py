@@ -5,6 +5,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message
+from llm import ask_llm
 
 from config import get_bot_token
 from db import init_db
@@ -36,6 +37,22 @@ class AddExpense(StatesGroup):
 def format_created_expense_message(expense: Expense) -> str:
     shop_text = f" ({expense.coffee_shop})" if expense.coffee_shop else ""
     return f"☕ Записал: {expense.amount} ₽ — {expense.drink}{shop_text}"
+
+
+def build_ask_prompt(question: str, expenses: list[Expense], total: int) -> str:
+    if expenses:
+        expenses_text = "\n".join(format_expense_item(expense) for expense in expenses)
+    else:
+        expenses_text = "Трат пока нет."
+
+    return (
+        "Ты помощник Telegram-бота для учета трат на кофе. "
+        "Отвечай по-русски, в дружелюбной форме."
+        "Уточняющих вопросов не задавай\n\n"
+        f"Вопрос пользователя: {question}\n\n"
+        f"Итого трат на кофе: {total} ₽\n"
+        f"Список трат:\n{expenses_text}"
+    )
 
 
 @dp.message(Command("start"))
@@ -205,6 +222,32 @@ async def cmd_list(message: Message) -> None:
     result = "\n".join(lines)
 
     await message.answer(f"Список трат ☕\n{result}")
+
+
+@dp.message(Command("ask"))
+async def cmd_ask(message: Message) -> None:
+    if not message.from_user:
+        await message.answer("Не удалось определить пользователя.")
+        return
+
+    question = (message.text or "").replace("/ask", "", 1).strip()
+
+    if not question:
+        await message.answer("Напиши вопрос после команды. Например: /ask дай совет по моим кофейным тратам")
+        return
+
+    uid = message.from_user.id
+    expenses = get_user_expenses(uid)
+    total = get_user_total_expenses(uid)
+    prompt = build_ask_prompt(question=question, expenses=expenses, total=total)
+
+    try:
+        answer = await asyncio.to_thread(ask_llm, prompt)
+    except Exception:
+        await message.answer("Не получилось получить ответ от LLM. Попробуй еще раз чуть позже.")
+        return
+
+    await message.answer(answer)
 
 
 async def main() -> None:
