@@ -1,6 +1,7 @@
 from typing import Optional
 
 from db import add_expense, delete_expense, get_expenses, get_total_expenses
+from models import Expense
 
 
 def create_expense(
@@ -24,7 +25,7 @@ def delete_user_expense(user_id: int, expense_id: int) -> bool:
     )
 
 
-def get_user_expenses(user_id: int) -> list[tuple[int, int, int, str, Optional[str], str]]:
+def get_user_expenses(user_id: int) -> list[Expense]:
     return get_expenses(user_id=user_id)
 
 

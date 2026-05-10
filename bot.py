@@ -206,8 +206,8 @@ async def cmd_list(message: Message) -> None:
 
     lines = []
 
-    for expense_id, user_id, amount, drink, coffee_shop, created_at in expenses:
-        lines.append(format_expense_item(expense_id, amount, drink, coffee_shop, created_at))
+    for expense in expenses:
+        lines.append(format_expense_item(expense))
 
     result = "\n".join(lines)
 

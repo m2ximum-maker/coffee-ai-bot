@@ -38,9 +38,9 @@ class CreateExpenseTest(unittest.TestCase):
         expenses = get_expenses(user_id=1)
 
         self.assertEqual(len(expenses), 1)
-        self.assertEqual(expenses[0][2], 100)
-        self.assertEqual(expenses[0][3], "американо")
-        self.assertEqual(expenses[0][4], "Жирафери")
+        self.assertEqual(expenses[0].amount, 100)
+        self.assertEqual(expenses[0].drink, "американо")
+        self.assertEqual(expenses[0].coffee_shop, "Жирафери")
 
     def test_get_user_expenses(self) -> None:
         create_expense(user_id=1, amount=100, drink="американо", coffee_shop=None)
@@ -48,7 +48,7 @@ class CreateExpenseTest(unittest.TestCase):
         expenses = get_user_expenses(user_id=1)
 
         self.assertEqual(len(expenses), 1)
-        self.assertEqual(expenses[0][2], 100)
+        self.assertEqual(expenses[0].amount, 100)
 
     def test_get_user_total_expenses(self) -> None:
         create_expense(user_id=1, amount=100, drink="американо", coffee_shop=None)
@@ -58,7 +58,7 @@ class CreateExpenseTest(unittest.TestCase):
 
     def test_delete_user_expense(self) -> None:
         create_expense(user_id=1, amount=100, drink="американо", coffee_shop=None)
-        expense_id = get_user_expenses(user_id=1)[0][0]
+        expense_id = get_user_expenses(user_id=1)[0].id
 
         self.assertTrue(delete_user_expense(user_id=1, expense_id=expense_id))
         self.assertEqual(get_user_expenses(user_id=1), [])

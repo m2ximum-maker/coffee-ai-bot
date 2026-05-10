@@ -23,14 +23,14 @@ class DeleteExpenseTest(unittest.TestCase):
 
     def test_delete_own_expense(self) -> None:
         add_expense(user_id=1, amount=100, drink="американо")
-        expense_id = get_expenses(user_id=1)[0][0]
+        expense_id = get_expenses(user_id=1)[0].id
 
         self.assertTrue(delete_expense(user_id=1, expense_id=expense_id))
         self.assertEqual(get_expenses(user_id=1), [])
 
     def test_cannot_delete_another_user_expense(self) -> None:
         add_expense(user_id=1, amount=100, drink="американо")
-        expense_id = get_expenses(user_id=1)[0][0]
+        expense_id = get_expenses(user_id=1)[0].id
 
         self.assertFalse(delete_expense(user_id=2, expense_id=expense_id))
         self.assertEqual(len(get_expenses(user_id=1)), 1)

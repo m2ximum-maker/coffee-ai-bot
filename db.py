@@ -4,6 +4,8 @@ import sqlite3
 from typing import Optional
 from datetime import datetime
 
+from models import Expense
+
 def db_path() -> str:
     path = os.getenv("DB_PATH")
 
@@ -65,9 +67,9 @@ def delete_expense(user_id: int, expense_id: int) -> bool:
         return cursor.rowcount > 0
 
 
-def get_expenses(user_id: int) -> list[tuple[int, int, int, str, Optional[str], str]]:
+def get_expenses(user_id: int) -> list[Expense]:
     with sqlite3.connect(db_path()) as conn:
-        return conn.execute(
+        rows = conn.execute(
             """
             SELECT id, user_id, amount, drink, coffee_shop, created_at
             FROM expenses
@@ -75,6 +77,18 @@ def get_expenses(user_id: int) -> list[tuple[int, int, int, str, Optional[str], 
             """,
             (user_id,),
         ).fetchall()
+
+    return [
+        Expense(
+            id=row[0],
+            user_id=row[1],
+            amount=row[2],
+            drink=row[3],
+            coffee_shop=row[4],
+            created_at=row[5],
+        )
+        for row in rows
+    ]
 
 def get_total_expenses(user_id: int) -> int:
     with sqlite3.connect(db_path()) as conn:

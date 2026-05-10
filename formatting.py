@@ -1,5 +1,6 @@
 from datetime import datetime
-from typing import Optional
+
+from models import Expense
 
 
 def format_created_at(created_at: str) -> str:
@@ -7,14 +8,8 @@ def format_created_at(created_at: str) -> str:
     return dt.strftime("%d.%m.%Y %H:%M")
 
 
-def format_expense_item(
-    expense_id: int,
-    amount: int,
-    drink: str,
-    coffee_shop: Optional[str],
-    created_at: str,
-) -> str:
-    coffee_shop_text = coffee_shop or "-"
-    created_at_text = format_created_at(created_at)
+def format_expense_item(expense: Expense) -> str:
+    coffee_shop_text = expense.coffee_shop or "-"
+    created_at_text = format_created_at(expense.created_at)
 
-    return f"{expense_id} | {amount} ₽ | {drink} | {coffee_shop_text} | {created_at_text}"
+    return f"{expense.id} | {expense.amount} ₽ | {expense.drink} | {coffee_shop_text} | {created_at_text}"
