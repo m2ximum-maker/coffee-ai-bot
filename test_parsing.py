@@ -10,6 +10,7 @@ from parsing import (
     get_add_error_message,
     get_delete_error_message,
     parse_add_command,
+    parse_amount,
     parse_delete_command,
 )
 
@@ -58,6 +59,22 @@ class GetAddErrorMessageTest(unittest.TestCase):
             get_add_error_message(ValueError(ERROR_AMOUNT_NOT_POSITIVE)),
             "Сумма должна быть больше нуля",
         )
+
+
+class ParseAmountTest(unittest.TestCase):
+    def test_parse_amount(self) -> None:
+        self.assertEqual(parse_amount("250"), 250)
+
+    def test_parse_amount_strips_spaces(self) -> None:
+        self.assertEqual(parse_amount(" 250 "), 250)
+
+    def test_parse_invalid_amount(self) -> None:
+        with self.assertRaisesRegex(ValueError, ERROR_INVALID_AMOUNT):
+            parse_amount("abc")
+
+    def test_parse_negative_amount(self) -> None:
+        with self.assertRaisesRegex(ValueError, ERROR_AMOUNT_NOT_POSITIVE):
+            parse_amount("-10")
 
 
 class ParseDeleteCommandTest(unittest.TestCase):

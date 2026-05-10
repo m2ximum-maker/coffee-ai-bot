@@ -30,6 +30,18 @@ def parse_add_command(text: str) -> tuple[int, str, Optional[str]]:
     return amount, drink, coffee_shop
 
 
+def parse_amount(text: str) -> int:
+    try:
+        amount = int(text.strip())
+    except ValueError as error:
+        raise ValueError(ERROR_INVALID_AMOUNT) from error
+
+    if amount <= 0:
+        raise ValueError(ERROR_AMOUNT_NOT_POSITIVE)
+
+    return amount
+
+
 def get_add_error_message(error: ValueError) -> str:
     error_code = str(error)
 

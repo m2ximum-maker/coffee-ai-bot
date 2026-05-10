@@ -3,6 +3,8 @@ import os
 
 from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message
 from dotenv import load_dotenv
 
@@ -12,6 +14,7 @@ from parsing import (
     get_add_error_message,
     get_delete_error_message,
     parse_add_command,
+    parse_amount,
     parse_delete_command,
 )
 
@@ -23,6 +26,12 @@ if not bot_token:
     raise ValueError("BOT_TOKEN не найден в .env")
 
 dp = Dispatcher()
+
+
+class AddExpense(StatesGroup):
+    waiting_for_amount = State()
+    waiting_for_drink = State()
+    waiting_for_coffee_shop = State()
 
 
 @dp.message(Command("start"))
@@ -38,10 +47,67 @@ async def cmd_start(message: Message) -> None:
     )
 
 
-@dp.message(Command("add"))
-async def cmd_add(message: Message) -> None:
+@dp.message(AddExpense.waiting_for_amount)
+async def process_add_amount(message: Message, state: FSMContext) -> None:
+    try:
+        amount = parse_amount(message.text or "")
+    except ValueError:
+        await message.answer("Введи сумму числом больше нуля, например: 250")
+        return
+
+    await state.update_data(amount=amount)
+    await state.set_state(AddExpense.waiting_for_drink)
+    await message.answer("Что пил? Например: капучино")
+
+
+@dp.message(AddExpense.waiting_for_drink)
+async def process_add_drink(message: Message, state: FSMContext) -> None:
+    drink = (message.text or "").strip()
+
+    if not drink:
+        await message.answer("Введи название напитка, например: капучино")
+        return
+
+    await state.update_data(drink=drink)
+    await state.set_state(AddExpense.waiting_for_coffee_shop)
+    await message.answer("Где купил? Если не хочешь указывать, отправь -")
+
+
+@dp.message(AddExpense.waiting_for_coffee_shop)
+async def process_add_coffee_shop(message: Message, state: FSMContext) -> None:
     if not message.from_user:
         await message.answer("Не удалось определить пользователя.")
+        return
+
+    coffee_shop_raw = (message.text or "").strip()
+    coffee_shop = None if coffee_shop_raw == "-" else coffee_shop_raw
+
+    data = await state.get_data()
+    amount = data["amount"]
+    drink = data["drink"]
+
+    add_expense(
+        user_id=message.from_user.id,
+        amount=amount,
+        drink=drink,
+        coffee_shop=coffee_shop,
+    )
+
+    await state.clear()
+
+    shop_text = f" ({coffee_shop})" if coffee_shop else ""
+    await message.answer(f"☕ Записал: {amount} ₽ — {drink}{shop_text}")
+
+
+@dp.message(Command("add"))
+async def cmd_add(message: Message, state: FSMContext) -> None:
+    if not message.from_user:
+        await message.answer("Не удалось определить пользователя.")
+        return
+
+    if (message.text or "").strip() == "/add":
+        await state.set_state(AddExpense.waiting_for_amount)
+        await message.answer("Введи сумму траты, например: 250")
         return
 
     try:
