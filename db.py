@@ -5,7 +5,12 @@ from typing import Optional
 from datetime import datetime
 
 def db_path() -> str:
-    return os.getenv("DB_PATH")
+    path = os.getenv("DB_PATH")
+
+    if path is None:
+        raise ValueError("DB_PATH не найден в .env")
+
+    return path
 
 
 def get_connection():
