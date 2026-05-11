@@ -81,7 +81,7 @@ OPENAI_MODEL=gpt-4.1-mini
 4. Запусти бота:
 
 ```bash
-.venv/bin/python bot.py
+.venv/bin/python -m app.main
 ```
 
 После запуска в терминале появится:

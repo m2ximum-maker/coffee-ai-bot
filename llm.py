@@ -1,6 +1,6 @@
 from openai import OpenAI
 
-from config import get_openai_api_key, get_openai_model
+from app.config import get_openai_api_key, get_openai_model
 
 
 def ask_llm(prompt: str) -> str:

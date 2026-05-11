@@ -2,7 +2,7 @@ import asyncio
 
 from aiogram import Bot
 
-from config import get_bot_token
+from app.config import get_bot_token
 from db import init_db
 from bot import dp
 

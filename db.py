@@ -3,7 +3,7 @@ import sqlite3
 from typing import Optional
 from datetime import datetime
 
-from config import get_db_path
+from app.config import get_db_path
 from models import Expense
 
 def db_path() -> str:
