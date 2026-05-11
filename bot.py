@@ -1,14 +1,12 @@
 import asyncio
 
-from aiogram import Bot, Dispatcher
+from aiogram import Dispatcher
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message
 from llm import ask_llm
 
-from config import get_bot_token
-from db import init_db
 from formatting import format_expense_item
 from models import Expense
 from parsing import (
@@ -248,16 +246,3 @@ async def cmd_ask(message: Message) -> None:
         return
 
     await message.answer(answer)
-
-
-async def main() -> None:
-    bot_token = get_bot_token()
-    bot = Bot(token=bot_token)
-    print("Бот успешно запущен ☕ Записываем траты на кофе...")
-    init_db()
-    print("База данных инициализирована")
-    await dp.start_polling(bot)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
